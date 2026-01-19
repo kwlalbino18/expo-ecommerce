@@ -11,13 +11,12 @@ app.get("/api/health", (req, res) => {
 });
 
 
-if (ENV.NODE_ENV === "production") {
-    app.use(express.static(path.join(__dirname, "../admin/dist")))
+if (ENV.NODE_ENV === "development") {
+    app.use(express.static(path.join(__dirname, "../admin/dist")));
 
-    // catch all routes and serve index.html
     app.get("/{*any}", (req, res) => {
-        res.sendFile(path.join(__dirname, "../admin", "index.html", "dist"))
-    })
+        res.sendFile(path.join(__dirname, "../admin", "dist", "index.html"));
+    });
 }
 
 app.listen(ENV.PORT, () => {
