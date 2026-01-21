@@ -4,6 +4,13 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+console.log("DEBUG: Current CWD:", process.cwd());
+console.log("DEBUG: DB_URL from process.env:", process.env.DB_URL);
+if (!process.env.DB_URL) {
+    console.error("DEBUG: DB_URL is explicitly undefined or empty");
+}
+
+
 export const ENV = {
     NODE_ENV: process.env.NODE_ENV,
     PORT: process.env.PORT,
