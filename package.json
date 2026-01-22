@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "engines": {
-    "node": "^20.0.0"
+    "node": ">=20.0.0"
   },
   "scripts": {
     "build": "npm install --prefix backend && npm install --prefix admin && npm run build --prefix admin",
@@ -12,14 +12,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kwlalbino18/expo-ecommerce.git"
+    "url": "git+https://github.com/burakorkmez/expo-ecommerce.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "bugs": {
-    "url": "https://github.com/kwlalbino18/expo-ecommerce/issues"
+    "url": "https://github.com/burakorkmez/expo-ecommerce/issues"
   },
-  "homepage": "https://github.com/kwlalbino18/expo-ecommerce#readme"
+  "homepage": "https://github.com/burakorkmez/expo-ecommerce#readme"
 }

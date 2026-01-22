@@ -1,43 +1,49 @@
 import express from "express";
 import path from "path";
-import { ENV } from "./config/env.js";
-import connectDB from "./config/db.js";
-import dns from "node:dns/promises";
 import { clerkMiddleware } from "@clerk/express";
 import { serve } from "inngest/express";
+
 import { functions, inngest } from "./config/inngest.js";
 
+import { ENV } from "./config/env.js";
+import { connectDB } from "./config/db.js";
+
+import dns from "node:dns/promises";
+
+
+import adminRoutes from "./routes/admin.route.js";
+
 const app = express();
+
 const __dirname = path.resolve();
+
+
 dns.setServers(["1.1.1.1"]);
-
-
 app.use(express.json());
-app.use(clerkMiddleware());
+app.use(clerkMiddleware()); // adds auth object under the req => req.auth
 
-app.use("/api/inngest", serve({ client: inngest, functions: functions }));
+app.use("/api/inngest", serve({ client: inngest, functions }));
+
+app.use("/api/admin", adminRoutes);
 
 app.get("/api/health", (req, res) => {
-    res.status(200).json({ message: "Success" })
+  res.status(200).json({ message: "Success" });
 });
 
+// make our app ready for deployment
+if (ENV.NODE_ENV === "production") {
+  app.use(express.static(path.join(__dirname, "../admin/dist")));
 
-if (ENV.NODE_ENV === "development") {
-    app.use(express.static(path.join(__dirname, "../admin/dist")));
-
-    app.get("/{*any}", (req, res) => {
-        res.sendFile(path.join(__dirname, "../admin", "dist", "index.html"));
-    });
+  app.get("/{*any}", (req, res) => {
+    res.sendFile(path.join(__dirname, "../admin", "dist", "index.html"));
+  });
 }
 
 const startServer = async () => {
-    app.listen(ENV.PORT, () => {
-        console.log(`Server running on port ${ENV.PORT} in ${ENV.NODE_ENV} mode`);
-        connectDB();
-    });
-
-}
+  await connectDB();
+  app.listen(ENV.PORT, () => {
+    console.log("Server is up and running");
+  });
+};
 
 startServer();
-
-
