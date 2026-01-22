@@ -9,13 +9,20 @@ import { ClerkProvider } from "@clerk/clerk-react";
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
 if (!PUBLISHABLE_KEY) {
-  throw new Error("Missing Publishable Key");
+  console.error("Missing VITE_CLERK_PUBLISHABLE_KEY environment variable");
+  // Fallback for development without Clerk
 }
 
-createRoot(document.getElementById("root")).render(
+const app = (
   <StrictMode>
-    <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
+    {PUBLISHABLE_KEY ? (
+      <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
+        <App />
+      </ClerkProvider>
+    ) : (
       <App />
-    </ClerkProvider>
+    )}
   </StrictMode>
 );
+
+createRoot(document.getElementById("root")).render(app);

@@ -4,13 +4,20 @@ function App() {
   return (
     <div>
       <h1>HOME PAGE</h1>
+      <p>Admin Dashboard</p>
 
       <SignedOut>
-        <SignInButton mode="modal" />
+        <div>
+          <p>Please sign in to access the admin dashboard</p>
+          <SignInButton mode="modal" />
+        </div>
       </SignedOut>
 
       <SignedIn>
-        <UserButton />
+        <div>
+          <p>Welcome to the admin dashboard!</p>
+          <UserButton />
+        </div>
       </SignedIn>
     </div>
   );
