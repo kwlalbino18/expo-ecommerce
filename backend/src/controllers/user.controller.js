@@ -1,82 +1,75 @@
-import { err } from "inngest/types";
-import { User } from "../models/user.model";
+import { User } from "../models/user.model.js";
 
-//Addresses
+export async function addAddress(req, res) {
+  try {
+    const { label, fullName, streetAddress, city, state, zipCode, phoneNumber, isDefault } =
+      req.body;
 
-export async function addAddresses(req, res){
+    const user = req.user;
 
-    try {
-        const{label, fullName, streetAddress, city, state, zipCode, phoneNumber, isDefault}=
-        req.body;
-
-        const user = req.user;
-        if(isDefault){
-            user.addAddresses.forEach((addr) =>{
-                addr.isDefault = false;
-            });
-        }
-
-        user.addAddresses.push({
-            label,
-            fullName,
-            streetAddress,
-            city,
-            state,
-            zipCode,
-            phoneNumber,
-            isDefault: isDefault || false
-
-        })
-
-        await user.save()
-        res.status(201).json({message:"Address added successfully", addAddresses: user.addAddresses})
-
-
-    } catch (error) {
-        console.error("Error in addAdress controller", error);
-        res.status(500).json({error: "Internal server error"});
+    if (!fullName || !streetAddress || !city || !state || !zipCode) {
+      return res.status(400).json({ error: "Missing required address fields" });
     }
 
+    // if this is set as default, unset all other defaults
+    if (isDefault) {
+      user.addresses.forEach((addr) => {
+        addr.isDefault = false;
+      });
+    }
+
+    user.addresses.push({
+      label,
+      fullName,
+      streetAddress,
+      city,
+      state,
+      zipCode,
+      phoneNumber,
+      isDefault: isDefault || false,
+    });
+
+    await user.save();
+
+    res.status(201).json({ message: "Address added successfully", addresses: user.addresses });
+  } catch (error) {
+    console.error("Error in addAddress controller:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
 }
 
-export async function getAddresses(req, res){
+export async function getAddresses(req, res) {
+  try {
+    const user = req.user;
 
-try {
-    
-    const user = req.user
-
-    res.status(200).json({addAddresses: user.addAddresses})
-} catch (error) {
-    
-    console.error("Error in getAddresses controller", error);
-    res.status(500).json({error: "Internal server error"})
+    res.status(200).json({ addresses: user.addresses });
+  } catch (error) {
+    console.error("Error in getAddresses controller:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
 }
 
+export async function updateAddress(req, res) {
+  try {
+    const { label, fullName, streetAddress, city, state, zipCode, phoneNumber, isDefault } =
+      req.body;
 
-}
+    const { addressId } = req.params;
 
-export async function updateAddresses(req, res){
+    const user = req.user;
+    const address = user.addresses.id(addressId);
+    if (!address) {
+      return res.status(404).json({ error: "Address not found" });
+    }
 
-    try {
-       
-const {label, fullName, streetAddress, city, state, zipCode, phoneNumber, isDefault}=
-        req.body;
-        const{addressId}= req.params
+    // if this is set as default, unset all other defaults
+    if (isDefault) {
+      user.addresses.forEach((addr) => {
+        addr.isDefault = false;
+      });
+    }
 
-        const user = req.user;
-        const address = user.addAddresses.id(addressId);
-
-        if(!address){
-            return res.status(404).json({error: "Address not dound"});
-        }
- 
-        if(isDefault){
-            user.addAddresses.forEach((addr) =>{
-                addr.isDefault = false;
-            });
-        }
-
-        address.label = label || address.label;
+    address.label = label || address.label;
     address.fullName = fullName || address.fullName;
     address.streetAddress = streetAddress || address.streetAddress;
     address.city = city || address.city;
@@ -86,35 +79,28 @@ const {label, fullName, streetAddress, city, state, zipCode, phoneNumber, isDefa
     address.isDefault = isDefault !== undefined ? isDefault : address.isDefault;
 
     await user.save();
-    res.status(200).json({message: "Address update successfully", addAddresses: user.addAddresses})
 
-    } catch (error) {
-
-        console.error("Error in getAddresses controller", error);
-    res.status(500).json({error: "Internal server error"})
-    }
+    res.status(200).json({ message: "Address updated successfully", addresses: user.addresses });
+  } catch (error) {
+    console.error("Error in updateAddress controller:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
 }
 
-export async function deleteAddresses(req, res){
+export async function deleteAddress(req, res) {
+  try {
+    const { addressId } = req.params;
+    const user = req.user;
 
-try {
-    const {addressId}= req.params;
-    const user= req.user
-
-    user.addAddresses.pull(addressId)
+    user.addresses.pull(addressId);
     await user.save();
 
-    res.status(200).json({message: "Address deleted successfully", addresses: user.addAddresses})
-
-} catch (error) {
-      console.error("Error in getAddresses controller", error);
-    res.status(500).json({error: "Internal server error"})
-    
+    res.status(200).json({ message: "Address deleted successfully", addresses: user.addresses });
+  } catch (error) {
+    console.error("Error in deleteAddress controller:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
 }
-
-}
-
-//Wishlist
 
 export async function addToWishlist(req, res) {
   try {
