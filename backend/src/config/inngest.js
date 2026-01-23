@@ -8,19 +8,36 @@ const syncUser = inngest.createFunction(
   { id: "sync-user" },
   { event: "clerk/user.created" },
   async ({ event }) => {
-    await connectDB();
-    const { id, email_addresses, first_name, last_name, image_url } = event.data;
+    try {
+      await connectDB();
+      const { id, email_addresses, first_name, last_name, image_url } = event.data;
 
-    const newUser = {
-      clerkId: id,
-      email: email_addresses[0]?.email_address,
-      name: `${first_name || ""} ${last_name || ""}` || "User",
-      imageUrl: image_url,
-      addresses: [],
-      wishlist: [],
-    };
+      console.log("🔄 Syncing user to MongoDB:", id);
 
-    await User.create(newUser);
+      // Check if user already exists
+      const existingUser = await User.findOne({ clerkId: id });
+      if (existingUser) {
+        console.log("✅ User already exists in MongoDB:", id);
+        return { success: true, message: "User already exists" };
+      }
+
+      const newUser = {
+        clerkId: id,
+        email: email_addresses[0]?.email_address,
+        name: `${first_name || ""} ${last_name || ""}`.trim() || "User",
+        imageUrl: image_url || "",
+        addresses: [],
+        wishlist: [],
+      };
+
+      const createdUser = await User.create(newUser);
+      console.log("✅ User created in MongoDB:", createdUser._id);
+      
+      return { success: true, userId: createdUser._id };
+    } catch (error) {
+      console.error("💥 Error creating user in MongoDB:", error);
+      throw error;
+    }
   }
 );
 
@@ -28,10 +45,25 @@ const deleteUserFromDB = inngest.createFunction(
   { id: "delete-user-from-db" },
   { event: "clerk/user.deleted" },
   async ({ event }) => {
-    await connectDB();
+    try {
+      await connectDB();
+      const { id } = event.data;
 
-    const { id } = event.data;
-    await User.deleteOne({ clerkId: id });
+      console.log("🗑️ Deleting user from MongoDB:", id);
+      
+      const result = await User.deleteOne({ clerkId: id });
+      
+      if (result.deletedCount > 0) {
+        console.log("✅ User deleted from MongoDB:", id);
+        return { success: true, deletedCount: result.deletedCount };
+      } else {
+        console.log("⚠️ User not found in MongoDB for deletion:", id);
+        return { success: false, message: "User not found" };
+      }
+    } catch (error) {
+      console.error("💥 Error deleting user from MongoDB:", error);
+      throw error;
+    }
   }
 );
 
