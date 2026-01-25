@@ -1,11 +1,11 @@
 import { Router } from "express";
-import { protectRoute } from "../middleware/auth.middleware";
-import { getAllProducts } from "../controllers/admin.controller";
-
-
+import { protectRoute } from "../middleware/auth.middleware.js";
+import { getAllProducts, getProductById } from "../controllers/product.controller.js";
 
 const router = Router();
 
-router.get("/", protectRoute, getAllProducts);
-router.get("/:id", protectRoute, getProductById);
-export default route;
+// Rutas públicas - no requieren autenticación
+router.get("/", getAllProducts);
+router.get("/:id", getProductById);
+
+export default router;
