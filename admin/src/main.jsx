@@ -3,7 +3,10 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.jsx";
 
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
 import { ClerkProvider } from "@clerk/clerk-react";
+import { BrowserRouter } from "react-router";
 
 // Import your Publishable Key
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
@@ -12,17 +15,16 @@ if (!PUBLISHABLE_KEY) {
   console.error("Missing VITE_CLERK_PUBLISHABLE_KEY environment variable");
   // Fallback for development without Clerk
 }
+const queryClient = new QueryClient();
 
-const app = (
+createRoot(document.getElementById("root")).render(
   <StrictMode>
-    {PUBLISHABLE_KEY ? (
+    <BrowserRouter>
       <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
-        <App />
+        <QueryClientProvider client={queryClient}>
+          <App />
+        </QueryClientProvider>
       </ClerkProvider>
-    ) : (
-      <App />
-    )}
+    </BrowserRouter>
   </StrictMode>
 );
-
-createRoot(document.getElementById("root")).render(app);
